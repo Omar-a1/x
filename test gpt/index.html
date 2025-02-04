@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MA Academy Global Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.10/babel.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        header {
+            background: #ffcc00;
+            color: #000;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .about {
+            margin: 20px 0;
+        }
+        .share {
+            margin-top: 20px;
+            display: none; /* Initially hidden */
+        }
+        textarea {
+            width: 100%;
+            height: 60px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        button {
+            background: #ffcc00;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #e6b800;
+        }
+        .comments {
+            margin-top: 20px;
+        }
+        .comment {
+            background: #f1f1f1;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+    // Firebase Config (Replace with your actual Firebase credentials)
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function App() {
+        const [comments, setComments] = React.useState([]);
+        const [newComment, setNewComment] = React.useState("");
+        const [password, setPassword] = React.useState("");
+        const [isAuthorized, setIsAuthorized] = React.useState(false);
+        const [showPostBox, setShowPostBox] = React.useState(false); // Initially Hidden
+
+        // Fetch Comments from Firestore
+        React.useEffect(() => {
+            const unsubscribe = db.collection("comments").orderBy("timestamp", "desc")
+                .onSnapshot(snapshot => {
+                    setComments(snapshot.docs.map(doc => doc.data().text));
+                });
+            return () => unsubscribe();
+        }, []);
+
+        // Post Comment to Firestore
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            if (newComment.trim() !== "") {
+                db.collection("comments").add({
+                    text: newComment,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                setNewComment("");
+            }
+        };
+
+        // Check Password Before Posting
+        const handlePasswordSubmit = () => {
+            if (password === "ma123456789") {
+                setIsAuthorized(true);
+            } else {
+                alert("Wrong password!");
+            }
+        };
+
+        return (
+            <div className="container">
+                <header>
+                    <h1>Welcome to MA Academy</h1>
+                    <p>Empowering knowledge & learning</p>
+                </header>
+
+                <section className="about">
+                    <h2>About MA Academy</h2>
+                    <p>
+                        MA Academy is dedicated to providing high-quality education and training to students. 
+                        We focus on practical learning, real-world skills, and expert guidance.
+                    </p>
+                </section>
+
+                {/* Toggle Button to Show/Hide Post Section */}
+                <button onClick={() => setShowPostBox(!showPostBox)}>
+                    {showPostBox ? "Hide Post Box" : "Show Post Box"}
+                </button>
+
+                {/* Post Section (Hidden by Default) */}
+                <section className="share" style={{ display: showPostBox ? "block" : "none" }}>
+                    <h2>Share Your Thoughts</h2>
+                    {!isAuthorized ? (
+                        <div>
+                            <input
+                                type="password"
+                                placeholder="Enter Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <button onClick={handlePasswordSubmit}>Submit</button>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleSubmit}>
+                            <textarea
+                                placeholder="Write something about MA Academy..."
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                            ></textarea>
+                            <button type="submit">Post</button>
+                        </form>
+                    )}
+                </section>
+
+                {/* Comments Section */}
+                <div className="comments">
+                    <h2>Recent Comments</h2>
+                    {comments.length > 0 ? (
+                        comments.map((comment, index) => (
+                            <div key={index} className="comment">
+                                {comment}
+                            </div>
+                        ))
+                    ) : (
+                        <p>No comments yet. Be the first to post!</p>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+</body>
+</html>
