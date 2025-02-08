@@ -1,194 +1,232 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>what is MA Academy</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.10/babel.min.js"></script>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
+    <title>MA Academy</title>
+    <meta charset="utf-8">
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
+            max-width: 1000px;
+            margin: 0 auto;
             padding: 20px;
+            background: #f5f5f5;
+            text-align: center; /* محاذاة النص إلى الوسط */
+            color: black; /* لون الخط أسود */
+        }
+        
+        .container {
             background: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            text-align: center; /* محاذاة النص إلى الوسط */
+        }
+        
+        .academy-info {
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 25px;
+            margin-bottom: 30px;
+            text-align: center; /* محاذاة النص إلى الوسط */
+        }
+        
+        .academy-info h2 {
+            color: #2c7a2f;
+            font-size: 28px;
+        }
+        
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
             border-radius: 10px;
+            margin: 15px auto; /* محاذاة العناصر إلى الوسط */
+            text-align: center; /* محاذاة النص إلى الوسط */
+            max-width: 800px; /* تحديد عرض أقصى للمحتوى */
         }
-        header {
-            background: #ffcc00;
-            color: #000;
-            padding: 15px;
-            border-radius: 10px;
+        
+        .info-section h3 {
+            color: #4CAF50;
+            margin: 0 0 15px 0;
         }
-        .about {
-            margin: 20px 0;
+        
+        .info-section ul {
+            list-style-type: none;
+            padding: 0;
+            line-height: 1.8;
+            text-align: right; /* محاذاة النص إلى اليمين داخل القوائم */
         }
-        .share {
-            margin-top: 20px;
-            display: none; /* Initially hidden */
+        
+        .info-section li {
+            margin-bottom: 10px;
+            position: relative;
+            padding-right: 20px;
         }
-        textarea {
-            width: 100%;
-            height: 60px;
+        
+        .info-section li::before {
+            content: "•";
+            color: #4CAF50;
+            position: absolute;
+            right: 0;
+        }
+        
+        .post-form {
+            margin-bottom: 20px;
+            text-align: center; /* محاذاة النص إلى الوسط */
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .post-input {
+            width: 80%; /* عرض مناسب للمحتوى */
             padding: 10px;
-            margin-top: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
+        
+        .password-input {
+            width: 200px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
         button {
-            background: #ffcc00;
-            color: #000;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
             border: none;
-            padding: 10px 15px;
+            border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
-            border-radius: 5px;
+            margin: 5px;
         }
+        
         button:hover {
-            background: #e6b800;
+            background-color: #45a049;
         }
-        .comments {
+        
+        .posts-container {
             margin-top: 20px;
+            text-align: center; /* محاذاة النص إلى الوسط */
         }
-        .comment {
-            background: #f1f1f1;
-            padding: 10px;
-            margin-top: 10px;
+        
+        .post {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
             border-radius: 5px;
+            max-width: 800px; /* تحديد عرض أقصى للمحتوى */
+            margin-left: auto; /* محاذاة العناصر إلى الوسط */
+            margin-right: auto;
+            text-align: right; /* محاذاة النص إلى اليمين داخل المنشورات */
+        }
+        
+        .error {
+            color: red;
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
+    <div id="root"></div>
 
-<div id="root"></div>
+    <script type="text/babel">
+        function App() {
+            const [posts, setPosts] = React.useState([]);
+            const [newPost, setNewPost] = React.useState("");
+            const [password, setPassword] = React.useState("");
+            const [isPostVisible, setIsPostVisible] = React.useState(false);
+            const [error, setError] = React.useState("");
 
-<script type="text/babel">
-    // Firebase Config (Replace with your actual Firebase credentials)
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
+            const handlePost = () => {
+                if (password === "ma123456789") {
+                    setPosts([{ text: newPost, date: new Date().toLocaleString() }, ...posts]);
+                    setNewPost("");
+                    setPassword("");
+                    setError("");
+                } else {
+                    setError("كلمة المرور غير صحيحة!");
+                }
+            };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    function App() {
-        const [comments, setComments] = React.useState([]);
-        const [newComment, setNewComment] = React.useState("");
-        const [password, setPassword] = React.useState("");
-        const [isAuthorized, setIsAuthorized] = React.useState(false);
-        const [showPostBox, setShowPostBox] = React.useState(false); // Initially Hidden
-
-        // Fetch Comments from Firestore
-        React.useEffect(() => {
-            const unsubscribe = db.collection("comments").orderBy("timestamp", "desc")
-                .onSnapshot(snapshot => {
-                    setComments(snapshot.docs.map(doc => doc.data().text));
-                });
-            return () => unsubscribe();
-        }, []);
-
-        // Post Comment to Firestore
-        const handleSubmit = (e) => {
-            e.preventDefault();
-            if (newComment.trim() !== "") {
-                db.collection("comments").add({
-                    text: newComment,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                setNewComment("");
-            }
-        };
-
-        // Check Password Before Posting
-        const handlePasswordSubmit = () => {
-            if (password === "ma123456789") {
-                setIsAuthorized(true);
-            } else {
-                alert("Wrong password!");
-            }
-        };
-
-        return (
-            <div className="container">
-                <header>
-                    <h1>Welcome</h1>
-                    <p>Empowering knowledge & learning</p>
-                </header>
-
-                <section className="about">
-                    <h2>About MA Academy</h2>
-                    <p>
-                        منصة تعليمية مصرية تقدم محتوى تعليمي للثانوية العامة و توفر جميع المواد الدراسية 
-                    </p>
-                </section>
-
-                {/* Toggle Button to Show/Hide Post Section */}
-                <button onClick={() => setShowPostBox(!showPostBox)}>
-                    {showPostBox ? "Hide Post Box" : "Show Post Box"}
-                </button>
-
-                {/* Post Section (Hidden by Default) */}
-                <section className="share" style={{ display: showPostBox ? "block" : "none" }}>
-                    <h2>Share Your Thoughts</h2>
-                    {!isAuthorized ? (
-                        <div>
-                            <input
-                                type="password"
-                                placeholder="Enter Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                            <button onClick={handlePasswordSubmit}>Submit</button>
+            return (
+                <div className="container">
+                    <div className="academy-info">
+                        <h2>أكاديمية MA - بوابة المعرفة</h2>
+                        
+                        <div className="info-section">
+                            <h3>أكاديمية معان (Ma'an Academy)</h3>
+                            <ul>
+                                <li>الرؤية: تعليم العربية بطريقة مونتيسوري مع الربط بالقرآن الكريم</li>
+                                <li>الفئات المستهدفة: الأطفال، الشباب، والكبار</li>
+                                <li>المنهج: يجمع بين اللغة العربية ومهارات الحياة العملية</li>
+                            </ul>
                         </div>
-                    ) : (
-                        <form onSubmit={handleSubmit}>
-                            <textarea
-                                placeholder="Write something about MA Academy..."
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                            ></textarea>
-                            <button type="submit">Post</button>
-                        </form>
-                    )}
-                </section>
 
-                {/* Comments Section */}
-                <div className="comments">
-                    <h2>Recent Comments</h2>
-                    {comments.length > 0 ? (
-                        comments.map((comment, index) => (
-                            <div key={index} className="comment">
-                                {comment}
+                        <div className="info-section">
+                            <h3>المنصات الإلكترونية</h3>
+                            <ul>
+                                <li>تطبيق الهاتف: متاح على <a href="https://play.google.com" target="_blank">جوجل بلاي</a></li>
+                                <li>المنصة التعليمية: <a href="https://ma-platform.com" target="_blank">MA Platform</a></li>
+                                <li>الدعم الفني: متاح 24/7 عبر المنصة</li>
+                            </ul>
+                        </div>
+
+                        <div className="info-section">
+                            <h3>البرامج الأكاديمية</h3>
+                            <ul>
+                                <li>ماجستير العربية مع الدراسات الإسلامية</li>
+                                <li>برنامج العربية للأعمال التجارية</li>
+                                <li>دورات مكثفة للغة العربية الفصحى</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h1>لوحة النشر التفاعلية</h1>
+                    <button onClick={() => setIsPostVisible(!isPostVisible)}>
+                        {isPostVisible ? "إخفاء نموذج النشر" : "إظهار نموذج النشر"}
+                    </button>
+
+                    <div className={`post-form ${!isPostVisible ? "hidden" : ""}`}>
+                        <textarea
+                            className="post-input"
+                            value={newPost}
+                            onChange={(e) => setNewPost(e.target.value)}
+                            placeholder="اكتب منشورك هنا..."
+                            rows="4"
+                        />
+                        <br />
+                        <input
+                            type="password"
+                            className="password-input"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="أدخل كلمة المرور للنشر"
+                        />
+                        <br />
+                        <button onClick={handlePost}>نشر</button>
+                        {error && <div className="error">{error}</div>}
+                    </div>
+
+                    <div className="posts-container">
+                        {posts.map((post, index) => (
+                            <div key={index} className="post">
+                                <div>{post.text}</div>
+                                <div style={{ color: '#666', fontSize: '0.8em' }}>{post.date}</div>
                             </div>
-                        ))
-                    ) : (
-                        <p>No comments yet. Be the first to post!</p>
-                    )}
+                        ))}
+                    </div>
                 </div>
-            </div>
-        );
-    }
+            );
+        }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-</script>
+        ReactDOM.render(<App />, document.getElementById('root'));
 
+        
+    </script>
 </body>
 </html>
